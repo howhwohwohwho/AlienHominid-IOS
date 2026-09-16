@@ -1,7 +1,6 @@
 import Foundation
 import GameController
 
-@MainActor
 final class ControllerManager {
 
     private(set) var connectedController: GCController?
@@ -10,42 +9,22 @@ final class ControllerManager {
 
     var input = ControllerInput()
 
-    private var connectObserver: NSObjectProtocol?
-    private var disconnectObserver: NSObjectProtocol?
-
     func start() {
         stop()
 
-        connectObserver = NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.GCControllerDidConnect,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let controller = notification.object as? GCController else {
-                return
-            }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(controllerConnected),
+            name: NSNotification.Name.GCControllerDidConnect,
+            object: nil
+        )
 
-            self?.connectedController = controller
-        }
-
-        disconnectObserver = NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.GCControllerDidDisconnect,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let controller = notification.object as? GCController else {
-                return
-            }
-
-            guard let self else {
-                return
-            }
-
-            if self.connectedController === controller {
-                self.connectedController = nil
-                self.input = ControllerInput()
-            }
-        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(controllerDisconnected),
+            name: NSNotification.Name.GCControllerDidDisconnect,
+            object: nil
+        )
 
         if let controller = GCController.controllers().first {
             connectedController = controller
@@ -55,15 +34,7 @@ final class ControllerManager {
     }
 
     func stop() {
-        if let connectObserver {
-            NotificationCenter.default.removeObserver(connectObserver)
-            self.connectObserver = nil
-        }
-
-        if let disconnectObserver {
-            NotificationCenter.default.removeObserver(disconnectObserver)
-            self.disconnectObserver = nil
-        }
+        NotificationCenter.default.removeObserver(self)
 
         connectedController = nil
         input = ControllerInput()
@@ -123,13 +94,30 @@ final class ControllerManager {
         )
     }
 
-    deinit {
-        if let connectObserver {
-            NotificationCenter.default.removeObserver(connectObserver)
+    @objc private func controllerConnected(
+        _ notification: Notification
+    ) {
+        guard let controller = notification.object as? GCController else {
+            return
         }
 
-        if let disconnectObserver {
-            NotificationCenter.default.removeObserver(disconnectObserver)
+        connectedController = controller
+    }
+
+    @objc private func controllerDisconnected(
+        _ notification: Notification
+    ) {
+        guard let controller = notification.object as? GCController else {
+            return
         }
+
+        if connectedController === controller {
+            connectedController = nil
+            input = ControllerInput()
+        }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
