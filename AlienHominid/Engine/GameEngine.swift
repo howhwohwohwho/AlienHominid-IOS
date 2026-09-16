@@ -16,19 +16,9 @@ final class GameEngine {
     private(set) var dataResult:
         GameDataImporter.ImportResult?
 
-   func start() {
-    state = .ready
-    print("Alien Hominid engine ready.")
-}
-
-        dataResult = dataImporter.scanGameData()
-
-        if dataResult?.success == true {
-            state = .ready
-        } else {
-            state = .ready
-            print("Game data is not installed yet.")
-        }
+    func start() {
+        state = .ready
+        print("Alien Hominid engine ready.")
     }
 
     func update(deltaTime: TimeInterval) {
