@@ -8,6 +8,8 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
     let textureManager: TextureManager
     private let spriteRenderer: SpriteRenderer
 
+    private var testSprite: Sprite?
+
     init?(view: MTKView) {
         guard let device = view.device,
               let commandQueue = device.makeCommandQueue(),
@@ -48,14 +50,28 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
+
+        // Sprite drawing will be enabled once a test texture
+        // has been loaded into the application bundle.
+        _ = testSprite
+    }
+
+    func setTestSprite(_ sprite: Sprite) {
+        testSprite = sprite
     }
 
     func drawTexture(
         _ texture: MTLTexture,
         in view: MTKView
     ) {
-        spriteRenderer.draw(
+        let sprite = Sprite(
             texture: texture,
+            position: SIMD2<Float>(0, 0),
+            size: SIMD2<Float>(0.5, 0.5)
+        )
+
+        spriteRenderer.draw(
+            sprite: sprite,
             in: view
         )
     }
@@ -64,6 +80,9 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
         _ view: MTKView,
         drawableSizeWillChange size: CGSize
     ) {
+        // Rendering resolution will be handled here later.
+    }
+}
         // Rendering resolution will be handled here later.
     }
 }
