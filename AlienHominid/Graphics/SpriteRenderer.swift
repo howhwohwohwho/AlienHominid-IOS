@@ -59,10 +59,12 @@ final class SpriteRenderer {
     }
 
     func draw(
-        texture: MTLTexture,
+        sprite: Sprite,
         in view: MTKView
     ) {
-        guard let drawable = view.currentDrawable,
+        guard sprite.visible,
+              let texture = sprite.texture,
+              let drawable = view.currentDrawable,
               let descriptor = view.currentRenderPassDescriptor,
               let commandBuffer = commandQueue.makeCommandBuffer(),
               let encoder = commandBuffer.makeRenderCommandEncoder(
@@ -82,21 +84,37 @@ final class SpriteRenderer {
             -1.0,  1.0, 0.0, 0.0
         ]
 
-        let buffer = device.makeBuffer(
+        let vertexBuffer = device.makeBuffer(
             bytes: vertices,
             length: vertices.count * MemoryLayout<Float>.size,
             options: []
         )
 
+        struct SpriteUniforms {
+            var position: SIMD2<Float>
+            var size: SIMD2<Float>
+        }
+
+        var uniforms = SpriteUniforms(
+            position: sprite.position,
+            size: sprite.size
+        )
+
         encoder.setRenderPipelineState(pipelineState)
 
-        if let buffer {
+        if let vertexBuffer {
             encoder.setVertexBuffer(
-                buffer,
+                vertexBuffer,
                 offset: 0,
                 index: 0
             )
         }
+
+        encoder.setVertexBytes(
+            &uniforms,
+            length: MemoryLayout<SpriteUniforms>.stride,
+            index: 1
+        )
 
         encoder.setFragmentTexture(
             texture,
