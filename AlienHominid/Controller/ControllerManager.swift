@@ -21,15 +21,11 @@ final class ControllerManager {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self else {
-                return
-            }
-
             guard let controller = notification.object as? GCController else {
                 return
             }
 
-            self.connectedController = controller
+            self?.connectedController = controller
         }
 
         disconnectObserver = NotificationCenter.default.addObserver(
@@ -37,11 +33,11 @@ final class ControllerManager {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self else {
+            guard let controller = notification.object as? GCController else {
                 return
             }
 
-            guard let controller = notification.object as? GCController else {
+            guard let self else {
                 return
             }
 
