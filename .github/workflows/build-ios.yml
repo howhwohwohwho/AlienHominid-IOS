@@ -32,14 +32,41 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             clean build
 
-      - name: Create unsigned IPA
+      - name: Verify app bundle
         run: |
-          mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/AlienHominid.app Payload/
-          zip -r AlienHominid-unsigned.ipa Payload
+          APP="build/Build/Products/Release-iphoneos/AlienHominid.app"
+
+          echo "Checking app..."
+          test -d "$APP"
+
+          echo "Checking Info.plist..."
+          test -f "$APP/Info.plist"
+
+          echo "Info.plist:"
+          /usr/libexec/PlistBuddy -c "Print" "$APP/Info.plist"
+
+          echo "Bundle:"
+          file "$APP/AlienHominid"
+
+      - name: Create IPA
+        run: |
+          rm -rf Payload AlienHominid.ipa
+
+          mkdir Payload
+          cp -R "build/Build/Products/Release-iphoneos/AlienHominid.app" "Payload/"
+
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent \
+            Payload AlienHominid.ipa
+
+          echo "IPA created:"
+          ls -lh AlienHominid.ipa
+
+      - name: Verify IPA
+        run: |
+          unzip -l AlienHominid.ipa | head -50
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: AlienHominid-iOS
-          path: AlienHominid-unsigned.ipa
+          path: AlienHominid.ipa
