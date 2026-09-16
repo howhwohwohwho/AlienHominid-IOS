@@ -21,32 +21,32 @@ vertex SpriteVertexOut spriteVertex(
     constant SpriteVertex *vertices [[buffer(0)]],
     constant SpriteUniforms &uniforms [[buffer(1)]]
 ) {
-    SpriteVertexOut out;
+    SpriteVertexOut output;
 
-    SpriteVertex vertex = vertices[vertexID];
+    SpriteVertex currentVertex = vertices[vertexID];
 
-    float2 position =
-        vertex.position * uniforms.size
+    float2 finalPosition =
+        currentVertex.position * uniforms.size
         + uniforms.position;
 
-    out.position = float4(
-        position,
+    output.position = float4(
+        finalPosition,
         0.0,
         1.0
     );
 
-    out.texCoord = vertex.texCoord;
+    output.texCoord = currentVertex.texCoord;
 
-    return out;
+    return output;
 }
 
 fragment float4 spriteFragment(
-    SpriteVertexOut in [[stage_in]],
+    SpriteVertexOut input [[stage_in]],
     texture2d<float> texture [[texture(0)]],
     sampler textureSampler [[sampler(0)]]
 ) {
     return texture.sample(
         textureSampler,
-        in.texCoord
+        input.texCoord
     );
 }
