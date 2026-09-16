@@ -1,3 +1,4 @@
+```metal
 #include <metal_stdlib>
 using namespace metal;
 
@@ -18,7 +19,7 @@ struct SpriteVertexOut {
 
 vertex SpriteVertexOut spriteVertex(
     uint vertexID [[vertex_id]],
-    constant SpriteVertex *vertices [[buffer(0)]],
+    const device SpriteVertex *vertices [[buffer(0)]],
     constant SpriteUniforms &uniforms [[buffer(1)]]
 ) {
     SpriteVertexOut output;
@@ -50,3 +51,4 @@ fragment float4 spriteFragment(
         input.texCoord
     );
 }
+```
