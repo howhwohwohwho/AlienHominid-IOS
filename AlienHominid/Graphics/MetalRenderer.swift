@@ -28,14 +28,16 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
             return
         }
 
-        if let renderPass = descriptor.colorAttachments[0] {
-            renderPass.loadAction = .clear
-            renderPass.storeAction = .store
-            renderPass.clearColor = MTLClearColor(
-                red: 0,
-                green: 0,
-                blue: 0,
-                alpha: 1
+        if let colorAttachment = descriptor.colorAttachments[0] {
+            colorAttachment.loadAction = .clear
+            colorAttachment.storeAction = .store
+
+            // Temporary background for the renderer.
+            colorAttachment.clearColor = MTLClearColor(
+                red: 0.05,
+                green: 0.05,
+                blue: 0.05,
+                alpha: 1.0
             )
         }
 
