@@ -6,10 +6,12 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
     private let commandQueue: MTLCommandQueue
 
     let textureManager: TextureManager
+    private let spriteRenderer: SpriteRenderer
 
     init?(view: MTKView) {
         guard let device = view.device,
-              let commandQueue = device.makeCommandQueue()
+              let commandQueue = device.makeCommandQueue(),
+              let spriteRenderer = SpriteRenderer(device: device)
         else {
             return nil
         }
@@ -17,6 +19,7 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
         self.device = device
         self.commandQueue = commandQueue
         self.textureManager = TextureManager(device: device)
+        self.spriteRenderer = spriteRenderer
 
         super.init()
 
@@ -31,11 +34,11 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
             return
         }
 
-        if let colorAttachment = descriptor.colorAttachments[0] {
-            colorAttachment.loadAction = .clear
-            colorAttachment.storeAction = .store
+        if let attachment = descriptor.colorAttachments[0] {
+            attachment.loadAction = .clear
+            attachment.storeAction = .store
 
-            colorAttachment.clearColor = MTLClearColor(
+            attachment.clearColor = MTLClearColor(
                 red: 0.05,
                 green: 0.05,
                 blue: 0.05,
@@ -45,6 +48,16 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
 
         commandBuffer.present(drawable)
         commandBuffer.commit()
+    }
+
+    func drawTexture(
+        _ texture: MTLTexture,
+        in view: MTKView
+    ) {
+        spriteRenderer.draw(
+            texture: texture,
+            in: view
+        )
     }
 
     func mtkView(
