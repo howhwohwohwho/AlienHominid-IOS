@@ -1,17 +1,22 @@
 name: Build iOS IPA
 
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Generate Xcode project
+      - name: Generate project
         run: xcodegen generate
 
       - name: Build iOS app
@@ -28,20 +33,18 @@ jobs:
 
       - name: Create IPA
         run: |
-          rm -rf Payload
-          rm -f AlienHominid.ipa
+          rm -rf Payload AlienHominid.ipa
 
-          mkdir -p Payload
+          mkdir Payload
 
           cp -R \
-            build/Build/Products/Release-iphoneos/AlienHominid.app \
-            Payload/AlienHominid.app
+            "build/Build/Products/Release-iphoneos/AlienHominid.app" \
+            "Payload/AlienHominid.app"
 
           zip -r AlienHominid.ipa Payload
 
       - name: Check IPA
         run: |
-          echo "IPA contents:"
           unzip -l AlienHominid.ipa
 
       - name: Upload IPA
@@ -50,3 +53,4 @@ jobs:
           name: AlienHominid-iOS
           path: AlienHominid.ipa
           if-no-files-found: error
+          
