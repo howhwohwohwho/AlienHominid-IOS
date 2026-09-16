@@ -13,14 +13,14 @@ final class ControllerManager {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(controllerConnected),
-            name: GCController.didConnectNotification,
+            name: NSNotification.Name.GCControllerDidConnect,
             object: nil
         )
 
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(controllerDisconnected),
-            name: GCController.didDisconnectNotification,
+            name: NSNotification.Name.GCControllerDidDisconnect,
             object: nil
         )
 
