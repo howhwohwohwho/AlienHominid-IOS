@@ -1,33 +1,15 @@
-import MetalKit
+import UIKit
 
-final class GameView: MTKView {
+final class GameView: UIView {
 
-    private(set) var renderer: MetalRenderer?
+    override init(frame: CGRect) {
+        super.init(frame: frame)
 
-    init() {
-        guard let device = MTLCreateSystemDefaultDevice() else {
-            fatalError("Metal is not supported on this device.")
-        }
-
-        super.init(frame: .zero, device: device)
-
-        framebufferOnly = false
-        enableSetNeedsDisplay = false
-        isPaused = false
-        preferredFramesPerSecond = 60
-        colorPixelFormat = .bgra8Unorm
-
-        clearColor = MTLClearColor(
-            red: 0,
-            green: 0,
-            blue: 0,
-            alpha: 1
-        )
-
-        renderer = MetalRenderer(view: self)
+        backgroundColor = .black
+        isOpaque = true
     }
 
-    required init(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
