@@ -7,6 +7,7 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
 
     let textureManager: TextureManager
     private let spriteRenderer: SpriteRenderer
+    private let testTextureGenerator: TestTextureGenerator
 
     private var testSprite: Sprite?
 
@@ -22,10 +23,28 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
         self.commandQueue = commandQueue
         self.textureManager = TextureManager(device: device)
         self.spriteRenderer = spriteRenderer
+        self.testTextureGenerator = TestTextureGenerator(
+            device: device
+        )
 
         super.init()
 
         view.delegate = self
+
+        createTestSprite()
+    }
+
+    private func createTestSprite() {
+        guard let texture = testTextureGenerator.makeTexture() else {
+            print("Could not create test texture.")
+            return
+        }
+
+        testSprite = Sprite(
+            texture: texture,
+            position: SIMD2<Float>(0, 0),
+            size: SIMD2<Float>(0.5, 0.5)
+        )
     }
 
     func draw(in view: MTKView) {
@@ -48,41 +67,31 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
             )
         }
 
+        if let sprite = testSprite,
+           let texture = sprite.texture {
+
+            spriteRenderer.draw(
+                sprite: Sprite(
+                    texture: texture,
+                    position: sprite.position,
+                    size: sprite.size,
+                    rotation: sprite.rotation,
+                    visible: sprite.visible
+                ),
+                in: view
+            )
+
+            return
+        }
+
         commandBuffer.present(drawable)
         commandBuffer.commit()
-
-        // Sprite drawing will be enabled once a test texture
-        // has been loaded into the application bundle.
-        _ = testSprite
-    }
-
-    func setTestSprite(_ sprite: Sprite) {
-        testSprite = sprite
-    }
-
-    func drawTexture(
-        _ texture: MTLTexture,
-        in view: MTKView
-    ) {
-        let sprite = Sprite(
-            texture: texture,
-            position: SIMD2<Float>(0, 0),
-            size: SIMD2<Float>(0.5, 0.5)
-        )
-
-        spriteRenderer.draw(
-            sprite: sprite,
-            in: view
-        )
     }
 
     func mtkView(
         _ view: MTKView,
         drawableSizeWillChange size: CGSize
     ) {
-        // Rendering resolution will be handled here later.
-    }
-}
         // Rendering resolution will be handled here later.
     }
 }
