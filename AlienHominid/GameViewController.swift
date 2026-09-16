@@ -2,43 +2,61 @@ import UIKit
 
 final class GameViewController: UIViewController {
 
-    private let titleLabel = UILabel()
-    private let statusLabel = UILabel()
+    private var gameView: GameView!
+    private let engine = GameEngine()
+    private let controllerManager = ControllerManager()
+    private var gameLoop: GameLoop!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         view.backgroundColor = .black
 
-        setupUI()
+        setupGameView()
+        setupGameLoop()
     }
 
-    private func setupUI() {
-        titleLabel.text = "Alien Hominid"
-        titleLabel.textColor = .white
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 32)
-        titleLabel.textAlignment = .center
+    private func setupGameView() {
+        gameView = GameView()
 
-        statusLabel.text = "Native iOS port"
-        statusLabel.textColor = .lightGray
-        statusLabel.font = UIFont.systemFont(ofSize: 18)
-        statusLabel.textAlignment = .center
+        gameView.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = UIStackView(arrangedSubviews: [
-            titleLabel,
-            statusLabel
-        ])
-
-        stack.axis = .vertical
-        stack.spacing = 12
-        stack.alignment = .fill
-        stack.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(stack)
+        view.addSubview(gameView)
 
         NSLayoutConstraint.activate([
-            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            gameView.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor
+            ),
+            gameView.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor
+            ),
+            gameView.topAnchor.constraint(
+                equalTo: view.topAnchor
+            ),
+            gameView.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor
+            )
         ])
+    }
+
+    private func setupGameLoop() {
+        gameLoop = GameLoop(
+            engine: engine,
+            controllerManager: controllerManager
+        )
+
+        gameLoop.start()
+    }
+
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+
+    deinit {
+        gameLoop?.stop()
     }
 }
