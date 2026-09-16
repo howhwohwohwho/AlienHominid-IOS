@@ -9,6 +9,9 @@
     <key>CFBundleDisplayName</key>
     <string>Alien Hominid</string>
 
+    <key>CFBundleExecutable</key>
+    <string>AlienHominid</string>
+
     <key>CFBundleName</key>
     <string>AlienHominid</string>
 
