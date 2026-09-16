@@ -1,89 +1,28 @@
-name: Build iOS IPA
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Build iOS app
-        run: |
-          xcodebuild \
-            -project AlienHominid.xcodeproj \
-            -scheme AlienHominid \
-            -configuration Release \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            clean build
-
-      - name: Find built app
-        run: |
-          echo "Searching for AlienHominid.app..."
-          find "$GITHUB_WORKSPACE/build" \
-            -type d \
-            -name "AlienHominid.app" \
-            -print
-
       - name: Create IPA
         run: |
-          APP="$GITHUB_WORKSPACE/build/Build/Products/Release-iphoneos/AlienHominid.app"
+          # your existing Create IPA commands here
 
-          if [ ! -d "$APP" ]; then
-            echo "ERROR: App not found at:"
-            echo "$APP"
-            exit 1
-          fi
-
-          rm -rf "$GITHUB_WORKSPACE/Payload"
-          rm -f "$GITHUB_WORKSPACE/AlienHominid.ipa"
-
-          mkdir -p "$GITHUB_WORKSPACE/Payload"
-
-          cp -R "$APP" \
-            "$GITHUB_WORKSPACE/Payload/AlienHominid.app"
-
-          echo "===== PAYLOAD ====="
-          find "$GITHUB_WORKSPACE/Payload" -maxdepth 3 -print
-
-          echo "===== CREATING IPA ====="
-
-          cd "$GITHUB_WORKSPACE"
-
-          /usr/bin/zip -r \
-            AlienHominid.ipa \
-            Payload
-
-          echo "===== IPA CONTENTS ====="
-          unzip -l AlienHominid.ipa
-
-      - name: Verify IPA
+      - name: Inspect app executable
         run: |
-          echo "===== VERIFYING IPA ====="
+          APP="build/Build/Products/Release-iphoneos/AlienHominid.app"
 
+          echo "=== APP FILES ==="
+          find "$APP" -maxdepth 2 -print
+
+          echo "=== INFO PLIST ==="
+          /usr/libexec/PlistBuddy -c "Print" "$APP/Info.plist"
+
+          echo "=== EXECUTABLE ==="
+          ls -lh "$APP/AlienHominid"
+
+          echo "=== FILE TYPE ==="
+          file "$APP/AlienHominid"
+
+          echo "=== ARCHITECTURE ==="
+          lipo -info "$APP/AlienHominid"
+
+          echo "=== IPA ==="
           unzip -l AlienHominid.ipa
-
-          if unzip -l AlienHominid.ipa | grep -q "Payload/AlienHominid.app/"; then
-            echo "SUCCESS: Payload/AlienHominid.app exists."
-          else
-            echo "ERROR: Payload/AlienHominid.app was not found."
-            exit 1
-          fi
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
