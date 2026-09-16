@@ -5,6 +5,8 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
     private let device: MTLDevice
     private let commandQueue: MTLCommandQueue
 
+    let textureManager: TextureManager
+
     init?(view: MTKView) {
         guard let device = view.device,
               let commandQueue = device.makeCommandQueue()
@@ -14,6 +16,7 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
 
         self.device = device
         self.commandQueue = commandQueue
+        self.textureManager = TextureManager(device: device)
 
         super.init()
 
@@ -32,7 +35,6 @@ final class MetalRenderer: NSObject, MTKViewDelegate {
             colorAttachment.loadAction = .clear
             colorAttachment.storeAction = .store
 
-            // Temporary background for the renderer.
             colorAttachment.clearColor = MTLClearColor(
                 red: 0.05,
                 green: 0.05,
