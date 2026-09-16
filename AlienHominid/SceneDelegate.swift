@@ -15,10 +15,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: windowScene)
 
-        let viewController = UIViewController()
-        viewController.view.backgroundColor = .black
+        let gameViewController = GameViewController()
 
-        window.rootViewController = viewController
+        window.rootViewController = gameViewController
         self.window = window
 
         window.makeKeyAndVisible()
