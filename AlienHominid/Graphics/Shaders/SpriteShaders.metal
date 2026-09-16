@@ -27,8 +27,8 @@ vertex SpriteVertexOut spriteVertex(
     SpriteVertex currentVertex = vertices[vertexID];
 
     float2 finalPosition =
-        currentVertex.position * uniforms.size
-        + uniforms.position;
+        currentVertex.position * uniforms.size +
+        uniforms.position;
 
     output.position = float4(
         finalPosition,
@@ -51,4 +51,3 @@ fragment float4 spriteFragment(
         input.texCoord
     );
 }
-```
