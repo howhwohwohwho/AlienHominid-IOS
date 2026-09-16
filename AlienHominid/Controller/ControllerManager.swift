@@ -1,6 +1,7 @@
 import Foundation
 import GameController
 
+@MainActor
 final class ControllerManager {
 
     private(set) var connectedController: GCController?
@@ -9,31 +10,67 @@ final class ControllerManager {
 
     var input = ControllerInput()
 
+    private var connectObserver: NSObjectProtocol?
+    private var disconnectObserver: NSObjectProtocol?
+
     func start() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(controllerConnected),
-            name: NSNotification.Name.GCControllerDidConnect,
-            object: nil
-        )
+        stop()
 
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(controllerDisconnected),
-            name: NSNotification.Name.GCControllerDidDisconnect,
-            object: nil
-        )
+        connectObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name.GCControllerDidConnect,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self else {
+                return
+            }
 
-        GCController.startWirelessControllerDiscovery()
+            guard let controller = notification.object as? GCController else {
+                return
+            }
+
+            self.connectedController = controller
+        }
+
+        disconnectObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name.GCControllerDidDisconnect,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self else {
+                return
+            }
+
+            guard let controller = notification.object as? GCController else {
+                return
+            }
+
+            if self.connectedController === controller {
+                self.connectedController = nil
+                self.input = ControllerInput()
+            }
+        }
 
         if let controller = GCController.controllers().first {
             connectedController = controller
         }
+
+        GCController.startWirelessControllerDiscovery()
     }
 
     func stop() {
-        NotificationCenter.default.removeObserver(self)
+        if let connectObserver {
+            NotificationCenter.default.removeObserver(connectObserver)
+            self.connectObserver = nil
+        }
+
+        if let disconnectObserver {
+            NotificationCenter.default.removeObserver(disconnectObserver)
+            self.disconnectObserver = nil
+        }
+
         connectedController = nil
+        input = ControllerInput()
     }
 
     func update() {
@@ -42,7 +79,9 @@ final class ControllerManager {
             return
         }
 
-        let movement = mapping.movement(controller: controller)
+        let movement = mapping.movement(
+            controller: controller
+        )
 
         input.moveX = movement.x
         input.moveY = movement.y
@@ -88,30 +127,13 @@ final class ControllerManager {
         )
     }
 
-    @objc private func controllerConnected(
-        _ notification: Notification
-    ) {
-        guard let controller = notification.object as? GCController else {
-            return
-        }
-
-        connectedController = controller
-    }
-
-    @objc private func controllerDisconnected(
-        _ notification: Notification
-    ) {
-        guard let controller = notification.object as? GCController else {
-            return
-        }
-
-        if connectedController === controller {
-            connectedController = nil
-            input = ControllerInput()
-        }
-    }
-
     deinit {
-        stop()
+        if let connectObserver {
+            NotificationCenter.default.removeObserver(connectObserver)
+        }
+
+        if let disconnectObserver {
+            NotificationCenter.default.removeObserver(disconnectObserver)
+        }
     }
 }
