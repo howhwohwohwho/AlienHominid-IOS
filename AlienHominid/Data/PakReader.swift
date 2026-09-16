@@ -52,7 +52,6 @@ final class PakReader {
                 offset: offset
             )
 
-            // Local file header.
             guard signature == 0x04034B50 else {
                 break
             }
@@ -122,11 +121,9 @@ final class PakReader {
             switch compression {
 
             case 0:
-                // Stored without compression.
                 fileData = compressedData
 
             case 8:
-                // Deflate.
                 fileData = try decompressDeflate(
                     compressedData,
                     expectedSize: Int(uncompressedSize)
@@ -160,6 +157,10 @@ final class PakReader {
             count: max(expectedSize, data.count * 4)
         )
 
+        // Store the capacity BEFORE entering the mutable access.
+        // This avoids Swift's overlapping-access error.
+        let destinationCapacity = destination.count
+
         let decodedSize = destination.withUnsafeMutableBytes {
             destinationBuffer -> Int in
 
@@ -180,7 +181,7 @@ final class PakReader {
 
                 return compression_decode_buffer(
                     destinationPointer,
-                    destination.count,
+                    destinationCapacity,
                     sourcePointer,
                     data.count,
                     nil,
