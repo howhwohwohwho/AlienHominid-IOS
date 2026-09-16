@@ -1,0 +1,27 @@
+name: AlienHominid
+
+options:
+  bundleIdPrefix: com.hussein.alienhominid
+  deploymentTarget:
+    iOS: "15.0"
+
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    TARGETED_DEVICE_FAMILY: "2"
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  AlienHominid:
+    type: application
+    platform: iOS
+
+    sources:
+      - path: AlienHominid
+
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hussein.alienhominid
+        INFOPLIST_FILE: AlienHominid/Info.plist
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
