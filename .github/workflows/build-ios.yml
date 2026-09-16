@@ -1,7 +1,4 @@
-      name: Build iOS IPA
-
-on:
-  workflow_dispatch:
+name: Build iOS IPA
 
 jobs:
   build:
@@ -52,9 +49,7 @@ jobs:
         run: |
           rm -rf Payload AlienHominid.ipa
           mkdir Payload
-          cp -R "build/Build/Products/Release-iphoneos/AlienHominid.app" \
-                "Payload/AlienHominid.app"
-
+          cp -R "build/Build/Products/Release-iphoneos/AlienHominid.app" "Payload/AlienHominid.app"
           zip -r AlienHominid.ipa Payload
 
           echo "=== IPA CONTENTS ==="
