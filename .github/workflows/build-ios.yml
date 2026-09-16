@@ -25,12 +25,12 @@ jobs:
           xcodebuild \
             -project AlienHominid.xcodeproj \
             -scheme AlienHominid \
-            -sdk iphoneos \
             -configuration Release \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            build
+            clean build
 
       - name: Create unsigned IPA
         run: |
