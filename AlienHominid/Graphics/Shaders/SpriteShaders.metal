@@ -6,6 +6,11 @@ struct SpriteVertex {
     float2 texCoord;
 };
 
+struct SpriteUniforms {
+    float2 position;
+    float2 size;
+};
+
 struct SpriteVertexOut {
     float4 position [[position]];
     float2 texCoord;
@@ -13,14 +18,19 @@ struct SpriteVertexOut {
 
 vertex SpriteVertexOut spriteVertex(
     uint vertexID [[vertex_id]],
-    constant SpriteVertex *vertices [[buffer(0)]]
+    constant SpriteVertex *vertices [[buffer(0)]],
+    constant SpriteUniforms &uniforms [[buffer(1)]]
 ) {
     SpriteVertexOut out;
 
     SpriteVertex vertex = vertices[vertexID];
 
+    float2 position =
+        vertex.position * uniforms.size
+        + uniforms.position;
+
     out.position = float4(
-        vertex.position,
+        position,
         0.0,
         1.0
     );
