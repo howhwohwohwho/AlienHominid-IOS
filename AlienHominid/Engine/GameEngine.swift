@@ -16,8 +16,10 @@ final class GameEngine {
     private(set) var dataResult:
         GameDataImporter.ImportResult?
 
-    func start() {
-        state = .loading
+   func start() {
+    state = .ready
+    print("Alien Hominid engine ready.")
+}
 
         dataResult = dataImporter.scanGameData()
 
