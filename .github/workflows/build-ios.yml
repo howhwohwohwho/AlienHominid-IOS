@@ -32,30 +32,56 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             clean build
 
-      - name: Verify app bundle
+      - name: Verify app
         run: |
           APP="build/Build/Products/Release-iphoneos/AlienHominid.app"
 
-          test -d "$APP"
-          test -f "$APP/Info.plist"
+          if [ ! -d "$APP" ]; then
+            echo "ERROR: AlienHominid.app was not created"
+            exit 1
+          fi
 
-          echo "Info.plist:"
-          /usr/libexec/PlistBuddy -c "Print" "$APP/Info.plist"
+          if [ ! -f "$APP/Info.plist" ]; then
+            echo "ERROR: Info.plist is missing"
+            exit 1
+          fi
+
+          echo "App found:"
+          ls -la "$APP"
 
       - name: Create IPA
         run: |
+          APP="build/Build/Products/Release-iphoneos/AlienHominid.app"
+
           rm -rf Payload AlienHominid.ipa
-          mkdir Payload
-          cp -R "build/Build/Products/Release-iphoneos/AlienHominid.app" Payload/AlienHominid.app
+
+          mkdir -p Payload
+
+          cp -R "$APP" "Payload/AlienHominid.app"
+
+          echo "Payload structure:"
+          find Payload -maxdepth 2 -print
+
           cd Payload
           zip -r ../AlienHominid.ipa AlienHominid.app
+          cd ..
 
-      - name: Verify IPA
+          echo "Final IPA contents:"
+          unzip -l AlienHominid.ipa
+
+      - name: Verify IPA Payload
         run: |
-          unzip -l AlienHominid.ipa | head -50
+          if ! unzip -l AlienHominid.ipa | grep -q "Payload/AlienHominid.app/Info.plist"; then
+            echo "ERROR: IPA does not contain Payload/AlienHominid.app/Info.plist"
+            exit 1
+          fi
+
+          echo "SUCCESS: Valid Payload detected."
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: AlienHominid-iOS
           path: AlienHominid.ipa
+          if-no-files-found: error
+          
