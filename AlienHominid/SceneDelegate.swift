@@ -1,6 +1,6 @@
 import UIKit
 
-final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
@@ -14,16 +14,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
 
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = GameViewController()
 
+        let viewController = UIViewController()
+        viewController.view.backgroundColor = .black
+
+        window.rootViewController = viewController
         self.window = window
-        window.makeKeyAndVisible()
-    }
 
-    func scene(
-        _ scene: UIScene,
-        supportedInterfaceOrientationsFor window: UIWindow?
-    ) -> UIInterfaceOrientationMask {
-        return .landscape
+        window.makeKeyAndVisible()
     }
 }
